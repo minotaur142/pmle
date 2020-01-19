@@ -46,14 +46,33 @@ def _information_matrix(X,weights):
     return I
 
 def _predict_proba(X):
-    if X.shape[1]==X.shape[1]-1:
-        X = _add_constant(X)
     preds = _sigmoid_pred(X,weights)
     return preds
 
 def _predict(X):
-    if X.shape[1]==X.shape[1]-1:
-        X = _add_constant(X)
     preds = _sigmoid_pred(X,weights).round()
     return preds
-                             
+
+def _FLIC(X,weights):
+    eta = np.dot(X,weights)
+    target = y-eta
+    b0_model = sm.OLS(target,np.ones(y.shape[0])).fit()
+    b0 = b0_model.params[0]
+    weights = np.insert(weights,0,b0)
+    return weights
+
+def _FLAC_aug(X,y,weights):
+    init_rows = X.shape[0]
+    hat_diag = _hat_diag(X,weights)
+    aug_sample_weights = pd.Series(np.concatenate([np.ones(init_rows),hat_diag/2,hat_diag/2]))
+
+    X = X.append(X).append(X)
+    X['pseudo_data']=0
+    X['pseudo_data'][init_rows:]=1
+    y = y.append(y).append(1-y)
+    return X, y, aug_sample_weights
+                        
+def _FLAC_pred_aug(X):
+    init_rows = X.shape[0]
+    X['pseudo_data']=0
+    return X
