@@ -45,11 +45,11 @@ def _information_matrix(X,weights):
     I = np.linalg.multi_dot([Xt,W,X])
     return I
 
-def _predict_proba(X):
+def _predict_proba(X,weights):
     preds = _sigmoid_pred(X,weights)
     return preds
 
-def _predict(X):
+def _predict(X,weights):
     preds = _sigmoid_pred(X,weights).round()
     return preds
 
