@@ -1,16 +1,30 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from utils import _add_constant, _predict, _predict_proba
+from utils import add_constant, predict, predict_proba
 
 class logF11():
     def __init__(self,add_int=True):
         self.add_int=add_int
-
+        '''PARAMETERS
+           add_int: add intercept'''
+        
     def data_augmentation(self,X,y=None,X_only=False):
+        '''Performs log-F(1,1) data augmentation
+        
+           PARAMETERS
+           X: A pandas dataframe of X values
+           y: A pandas dataframe or series of y values
+           X_only: If True, only returns augmented X values
+
+           RETURNS
+           X: augmented X values              
+           y: augmented y values
+           sample_weights: sample weights'''
+        
         num_rows = X.shape[1]
         if self.add_int==True:
-            X = _add_constant(X)
+            X = add_constant(X)
 
         #Augment X
         aug_X = pd.DataFrame(0,columns=X.columns,index=(range(num_rows)))
@@ -40,6 +54,13 @@ class logF11():
 
 
     def fit(self,X,y):
+        '''Calculates log-F(1,1) logistic regression coefficients
+           
+           PARAMETERS
+           X: A pandas dataframe of X values
+           y: A pandas dataframe of y values'''
+        
+           
         self.X = X
         self.y = y
         X, y, sample_weights = self.data_augmentation(X,y)
@@ -52,9 +73,9 @@ class logF11():
     def predict(self,X):
         orig_rows = X.shape[0]
         X = self.data_augmentation(X,X_only=True)
-        return _predict(X,self.weights)[:orig_rows]
+        return predict(X,self.weights)[:orig_rows]
 
     def predict_proba(self,X):
         orig_rows = X.shape[0]
         X = self.data_augmentation(X,X_only=True)
-        return _predict_proba(X,self.weights)[:orig_rows]
+        return predict_proba(X,self.weights)[:orig_rows]

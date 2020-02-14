@@ -1,7 +1,11 @@
-# wip-pmle
-penalized maximum likelihood estimation
-Contains Firth Logistic Regression class with tuneable Firth logit, Firth Logit with Intercept Correction and Firth Logit with 
-Added Covariate
+# PMLE
+Python implementation of five classification algorithms using penalized maximum likelihood estimation
+Used to obtain superior binary classifications with small, separated and imbalanced datasets
 
-Also contains (wip) log-F(1,1) logistic regression
-Will add Cauchy priors
+Firth's Logit - small datasets, separated datasets, imbalanced datasets 
+Tuneable Firth - imbalanced datasets - binary classifications only
+Firth's Logit with Intercept Correction (FLIC) - imbalanced datasets 
+Firth's Logit with Added Covariate (FLAC) - imbalanced datasets 
+Log-F(1,1) Logistic Regression - small datasets
+
+*Data must be passed as pandas dataframes or series

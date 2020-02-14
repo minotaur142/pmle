@@ -5,7 +5,7 @@ import random
 import statsmodels.api as sm
 from sklearn.metrics import recall_score
 from sklearn.metrics import log_loss
-from utils import _add_constant,_hat_diag,_sigmoid_pred,_sigmoid_pred, _information_matrix, _predict, _predict_proba, _FLIC, _FLAC_aug, _FLAC_pred_aug
+from utils import *
 
 class Firth_Logit():
         def __init__(self,num_iters=10000, lr=0.01,add_int=True, metric = None, readout_rate = None, lmbda=0.5,FLAC=False, FLIC=False):
@@ -32,9 +32,9 @@ class Firth_Logit():
             self.readout_rate = readout_rate
         
         def firth_gd(self,X,y,weights):
-            y_pred = _sigmoid_pred(X=X,weights=weights)
-            H =_hat_diag(X,weights)
-            I = _information_matrix(X,weights)
+            y_pred = sigmoid_pred(X=X,weights=weights)
+            H =hat_diag(X,weights)
+            I = information_matrix(X,weights)
             U = np.matmul((y -y_pred + self.lmbda*H*(1 - 2*y_pred)),X)
             weights += np.matmul(np.linalg.inv(I),U)*self.lr
             return weights
@@ -43,7 +43,7 @@ class Firth_Logit():
             #add intercept if necessary
             orig_X = X
             if self.add_int==True:
-                X =_add_constant(X)
+                X =add_constant(X)
             self.X = X
             self.y = y
 
@@ -65,7 +65,7 @@ class Firth_Logit():
                 weights = self.firth_gd(X,y,weights)
             
                 if self.metric != None:
-                    proba = _sigmoid_pred(X,weights)
+                    proba = sigmoid_pred(X,weights)
                     if self.metric == 'recall_score':
                         proba = proba.round()
                     score = metric(y,proba)
@@ -81,7 +81,7 @@ class Firth_Logit():
                 
             
             if (self.FLAC==True)&(self.FLIC==True):
-                X,y,aug_sample_weights=_FLAC_aug(X,y,weights)
+                X,y,aug_sample_weights=FLAC_aug(X,y,weights)
                 self.X = X
                 self.y = y
                 sklogit = LogisticRegression(solver='newton-cg',penalty='none',fit_intercept=False)
@@ -94,7 +94,7 @@ class Firth_Logit():
                 weights = np.insert(weights,0,b0)
             
             elif self.FLAC==True:
-                X,y,aug_sample_weights=_FLAC_aug(X,y,weights)
+                X,y,aug_sample_weights=FLAC_aug(X,y,weights)
                 self.X = X
                 self.y = y
                 sklogit = LogisticRegression(solver='newton-cg',penalty='none',fit_intercept=False)
@@ -113,10 +113,10 @@ class Firth_Logit():
             weights = pd.Series(weights.flatten(),index=self.X.columns)
             self.weights = weights
             
-            I = _information_matrix(X,weights)
-            hat_matrix_diag = _hat_diag(X,weights)
+            I = information_matrix(X,weights)
+            hat_matrix_diag = hat_diag(X,weights)
             Hessian = -I
-            y_pred = _sigmoid_pred(X,weights)
+            y_pred = sigmoid_pred(X,weights)
             
             self.I = I
             self.hat_matrix_diag = hat_matrix_diag
@@ -124,6 +124,20 @@ class Firth_Logit():
             
             
             self.log_likelihood = (y*np.log(y_pred)+(1-y)*np.log(1-y_pred)).sum()+0.5*np.log(np.linalg.det(I))
+        
+        def predict(self,X):
+            if self.FLAC==True:
+                X = FLAC_pred_aug(X)
+            if self.add_int==True:
+                X= add_constant(X)
+            return predict(X,self.weights)
+        
+        def predict_proba(self,X):
+            if self.FLAC==True:
+                X = FLAC_pred_aug(X)
+            if self.add_int==True:
+                X = add_constant(X)
+            return predict_proba(X,self.weights)
             
             
         def marginal_effects(self,values=None):
@@ -138,14 +152,14 @@ class Firth_Logit():
             def at_specific_values(self,values):
                 n_features = self.weights.shape[0]
                 if values.shape[0]==n_features-1:
-                    values = _add_constant(values)
+                    values = add_constant(values)
                 
-                p = _sigmoid_pred(values,self.weights)
+                p = sigmoid_pred(values,self.weights)
                 effs = np.ones(n_features)
                 for i in range(n_features):
                     weights_copy = self.weights.copy()
                     weights_copy[i]+=1
-                    new_p =_sigmoid_pred(values,weights_copy)
+                    new_p = sigmoid_pred(values,weights_copy)
                     effs[i] = new_p-p
                 return effs
             
@@ -157,11 +171,11 @@ class Firth_Logit():
             averaged_marg_effs = np.ones((self.X.shape[0],self.X.shape[1]))
             for i in range(self.X.shape[0]):
                 row = self.X.iloc[i]
-                p = _sigmoid_pred(row,self.weights)
+                p = sigmoid_pred(row,self.weights)
                 for j in range(self.weights.shape[0]):
                     weights_copy = self.weights.copy()
                     weights_copy[j]+=1
-                    new_p =_sigmoid_pred(row,weights_copy)
+                    new_p = sigmoid_pred(row,weights_copy)
                     eff = new_p-p
                     averaged_marg_effs[i,j] = eff
                 ame = pd.DataFrame(averaged_marg_effs.mean(axis=0),index=self.X.columns, columns=['mean'])

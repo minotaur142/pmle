@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-def _add_constant(X):
+def add_constant(X):
     if isinstance(X, np.ndarray):
         intercept = np.ones((X.shape[0], 1))
         X = np.concatenate((intercept, X), axis=1)
@@ -13,17 +13,17 @@ def _add_constant(X):
         raise TypeError("Data must be pandas dataframe or numpy array")
     return X
 
-def _sigmoid_pred(X, weights):
+def sigmoid_pred(X, weights):
     z = np.dot(X,weights)
     sig =  1/(1 + np.exp(-1*z))
     sig = np.clip(sig,.000001,.999999)
     return sig
 
-def _hat_diag(X,weights):
+def hat_diag(X,weights):
     Xt = X.transpose()
 
     #Get diagonal of error
-    y_pred = _sigmoid_pred(X,weights)
+    y_pred = sigmoid_pred(X,weights)
     W = np.diag(y_pred*(1-y_pred))
 
     #Calculate Fisher Information Matrix
@@ -34,26 +34,26 @@ def _hat_diag(X,weights):
     hat_diag = np.diag(hat)
     return hat_diag
 
-def _information_matrix(X,weights):
+def information_matrix(X,weights):
     Xt = X.transpose()
 
     #Get diagonal of error
-    y_pred = _sigmoid_pred(X,weights)
+    y_pred = sigmoid_pred(X,weights)
     W = np.diag(y_pred*(1-y_pred))
 
     #Calculate Fisher Information Matrix
     I = np.linalg.multi_dot([Xt,W,X])
     return I
 
-def _predict_proba(X,weights):
-    preds = _sigmoid_pred(X,weights)
+def predict_proba(X,weights):
+    preds = sigmoid_pred(X,weights)
     return preds
 
-def _predict(X,weights):
-    preds = _sigmoid_pred(X,weights).round()
+def predict(X,weights):
+    preds = sigmoid_pred(X,weights).round()
     return preds
 
-def _FLIC(X,weights):
+def FLIC(X,weights):
     eta = np.dot(X,weights)
     target = y-eta
     b0_model = sm.OLS(target,np.ones(y.shape[0])).fit()
@@ -61,9 +61,9 @@ def _FLIC(X,weights):
     weights = np.insert(weights,0,b0)
     return weights
 
-def _FLAC_aug(X,y,weights):
+def FLAC_aug(X,y,weights):
     init_rows = X.shape[0]
-    hat_diag = _hat_diag(X,weights)
+    hat_diag = hat_diag(X,weights)
     aug_sample_weights = pd.Series(np.concatenate([np.ones(init_rows),hat_diag/2,hat_diag/2]))
 
     X = X.append(X).append(X)
@@ -73,7 +73,7 @@ def _FLAC_aug(X,y,weights):
     X.const[init_rows:] = 0
     return X, y, aug_sample_weights
                         
-def _FLAC_pred_aug(X):
+def FLAC_pred_aug(X):
     init_rows = X.shape[0]
     X['pseudo_data']=0
     return X
