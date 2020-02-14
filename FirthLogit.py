@@ -18,7 +18,8 @@ class Firth_Logit():
                readout_rate: number of iterations between readouts
                
                MODIFICATIONS FOR RARE EVENTS
-               lmbda: tuneable parameter for target mean prediction value               
+               lmbda: tuneable parameter for target mean prediction value 
+                      (change value to implement tuneable Firth logit)
                FLAC: perform Firth Logistic regression with added covariate
                FLIC: perform Firth Logistic regression with Intercept Correction'''
 
