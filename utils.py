@@ -70,6 +70,7 @@ def _FLAC_aug(X,y,weights):
     X['pseudo_data']=0
     X['pseudo_data'][init_rows:]=1
     y = y.append(y).append(1-y)
+    X.const[init_rows:] = 0
     return X, y, aug_sample_weights
                         
 def _FLAC_pred_aug(X):
