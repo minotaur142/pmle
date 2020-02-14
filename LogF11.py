@@ -54,13 +54,12 @@ class logF11():
 
 
     def fit(self,X,y):
-        '''Calculates log-F(1,1) logistic regression coefficients
-           
-           PARAMETERS
-           X: A pandas dataframe of X values
-           y: A pandas dataframe of y values'''
+    '''Calculates log-F(1,1) logistic regression coefficients
+
+       PARAMETERS
+       X: A pandas dataframe of X values
+       y: A pandas dataframe of y values'''
         
-           
         self.X = X
         self.y = y
         X, y, sample_weights = self.data_augmentation(X,y)
