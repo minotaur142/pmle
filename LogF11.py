@@ -41,11 +41,10 @@ class logF11():
         # Combine real and pseudo-variable dataframes
         X = pd.concat([X,aug_X]).reset_index(drop=True)
         self.aug_X = X
-
-        if type(y)==None:
+        
+        if type(y)==type(None):
             return X
 
-        
         else:
             # Augment y variable by adding a 0 and 1 for
             aug_y = pd.Series(0,index=(range(num_rows)))
@@ -63,11 +62,13 @@ class logF11():
 
 
     def fit(self,X,y):
-        '''Calculates log-F(1,1) logistic regression coefficients
+        '''Calculates log-F(1,1) logistic regression coefficients,
+           stores model as model and model coefficients as weights.
 
            PARAMETERS
            X: A pandas dataframe of X values
            y: A pandas dataframe of y values'''
+        
         
         self.X = X
         self.y = y
