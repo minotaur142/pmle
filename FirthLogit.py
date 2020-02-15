@@ -80,7 +80,7 @@ class Firth_Logit():
                     if (i > 10) & (min_max(scores) not in scores[-10:]):
                         self.lr = self.lr*0.9
                 
-            
+            # for experimentation
             if (self.FLAC==True)&(self.FLIC==True):
                 X,y,aug_sample_weights=FLAC_aug(X,y,weights)
                 self.X = X
