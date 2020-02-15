@@ -9,7 +9,7 @@ class logF11():
         '''PARAMETERS
            add_int: add intercept'''
         
-    def data_augmentation(self,X,y=None,X_only=False):
+    def data_augmentation(self,X,y=None):
         '''Performs log-F(1,1) data augmentation
         
            PARAMETERS
@@ -22,23 +22,32 @@ class logF11():
            y: augmented y values
            sample_weights: sample weights'''
         
-        num_rows = X.shape[1]
+        # Determine the number of pseudo
+        num_rows = X.shape[1]*2
         if self.add_int==True:
             X = add_constant(X)
 
-        #Augment X
+        # Create a new dataframe for the X variable pseudo-data
         aug_X = pd.DataFrame(0,columns=X.columns,index=(range(num_rows)))
-        for ind, rows in enumerate(range(0,aug_X.shape[0],2),start=1):
+        
+        # Set one X variable to 1 in each pair of pseudo-data rows excluding the intercept
+        if self.add_int==True:
+            start = 1
+        else:
+            start = 0
+        for ind, rows in enumerate(range(0,aug_X.shape[0],2),start=start):
             aug_X.iloc[rows:rows+2,ind]=1
-        X = pd.concat([X,aug_X])
+
+        # Combine real and pseudo-variable dataframes
+        X = pd.concat([X,aug_X]).reset_index(drop=True)
         self.aug_X = X
 
-        if X_only==True:
-
+        if type(y)==None:
             return X
 
+        
         else:
-            #Augment y
+            # Augment y variable by adding a 0 and 1 for
             aug_y = pd.Series(0,index=(range(num_rows)))
             aug_y[range(1,num_rows,2)]=1
             y = pd.concat([y,aug_y])
@@ -54,11 +63,11 @@ class logF11():
 
 
     def fit(self,X,y):
-    '''Calculates log-F(1,1) logistic regression coefficients
+        '''Calculates log-F(1,1) logistic regression coefficients
 
-       PARAMETERS
-       X: A pandas dataframe of X values
-       y: A pandas dataframe of y values'''
+           PARAMETERS
+           X: A pandas dataframe of X values
+           y: A pandas dataframe of y values'''
         
         self.X = X
         self.y = y
@@ -71,10 +80,10 @@ class logF11():
 
     def predict(self,X):
         orig_rows = X.shape[0]
-        X = self.data_augmentation(X,X_only=True)
+        X = self.data_augmentation(X)
         return predict(X,self.weights)[:orig_rows]
 
     def predict_proba(self,X):
         orig_rows = X.shape[0]
-        X = self.data_augmentation(X,X_only=True)
+        X = self.data_augmentation(X)
         return predict_proba(X,self.weights)[:orig_rows]
