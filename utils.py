@@ -28,11 +28,20 @@ def hat_diag(X,weights):
 
     #Calculate Fisher Information Matrix
     I = np.linalg.multi_dot([Xt,W,X]) 
-
+    
     #Get Diagonal of Hat Matrix
     hat = np.linalg.multi_dot([W**0.5,X,np.linalg.inv(I),Xt,W**0.5])
     hat_diag = np.diag(hat)
     return hat_diag
+
+def return_full_rank(A):
+    det = np.linalg.det(A)
+    if det == 0:
+        factorization = np.linalg.qr(A)[1]
+        zeros = np.zeros(A.shape[1])
+        not_redundant = [row for row in range(factorization.shape[0])\
+                         if sum(factorization[row,:]!=zeros)==0]
+        return A[not_redundant]
 
 def information_matrix(X,weights):
     Xt = X.transpose()
@@ -77,3 +86,14 @@ def FLAC_pred_aug(X):
     init_rows = X.shape[0]
     X['pseudo_data']=0
     return X
+
+def LU_inv(A):
+    n = A.shape[0]
+    id_matrix = np.identity(n)
+    L, U = scipy.linalg.lu(A,permute_l=True)
+    inv = np.ones([n,n])
+    for col in range(n):
+        z = np.linalg.solve(L,id_matrix[:,col])
+        x = np.linalg.solve(U,z)
+        inv[:,col] = x
+    return inv
