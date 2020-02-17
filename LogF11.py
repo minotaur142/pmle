@@ -3,11 +3,13 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from utils import add_constant, predict, predict_proba
 
-class logF11():
-    def __init__(self,add_int=True):
+class LogFLogit():
+    def __init__(self,add_int=True,m=1):
         self.add_int=add_int
+        self.m = m
         '''PARAMETERS
-           add_int: add intercept'''
+           add_int: add intercept
+           m: specify which log-F(m,m) distribution'''
         
     def data_augmentation(self,X,y=None):
         '''Performs log-F(1,1) data augmentation
@@ -44,20 +46,30 @@ class logF11():
         
         if type(y)==type(None):
             return X
-
         else:
-            # Augment y variable by adding a 0 and 1 for
-            aug_y = pd.Series(0,index=(range(num_rows)))
+            if type(y)==pd.DataFrame:
+                name = y.columns[0]
+                y = y.iloc[:,0]
+            elif type(y)==pd.Series:
+                name = y.name
+            else:
+                raise 'Data must be in pandas format'
+            aug_y = pd.Series(0,name=name,index=range(num_rows))
             aug_y[range(1,num_rows,2)]=1
             y = pd.concat([y,aug_y])
             self.aug_y = y
+            
+            if self.m%2==0:
+                sample_weights = np.ones(X.shape[0])
+                
+                return X, y, sample_weights
+            else:
+                pseudoweight = self.m/2                                         
+                sample_weights = np.ones(X.shape[0])
+                sample_weights[-num_rows:] = pseudoweight
+                self.sample_weights = sample_weights
 
-            #Get sample weights
-            sample_weights = np.ones(X.shape[0])
-            sample_weights[-num_rows:] = 0.5
-            self.sample_weights = sample_weights
-
-            return X, y, sample_weights
+                return X, y, sample_weights
 
 
 
