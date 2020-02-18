@@ -56,7 +56,7 @@ class LogFLogit():
                 raise 'Data must be in pandas format'
             aug_y = pd.Series(0,name=name,index=range(num_rows))
             aug_y[range(1,num_rows,2)]=1
-            y = pd.concat([y,aug_y])
+            y = pd.concat([y,aug_y]).reset_index(drop=True)
             self.aug_y = y
             
             if self.m%2==0:
