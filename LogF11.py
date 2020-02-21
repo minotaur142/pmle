@@ -91,12 +91,12 @@ class LogFLogit():
         weights = pd.Series(sklogit.coef_.flatten(),index=X.columns)           
         self.weights = weights
 
-    def predict(self,X):
-        orig_rows = X.shape[0]
-        X = self.data_augmentation(X)
-        return predict(X,self.weights)[:orig_rows]
-
     def predict_proba(self,X):
         orig_rows = X.shape[0]
         X = self.data_augmentation(X)
         return predict_proba(X,self.weights)[:orig_rows]
+    
+    def predict(self,X):
+        return self.predict_proba(X).round()
+
+    

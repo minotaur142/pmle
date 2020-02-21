@@ -112,20 +112,16 @@ class Firth_Logit():
             
             self.log_likelihood = (y*np.log(y_pred)+(1-y)*np.log(1-y_pred)).sum()+0.5*np.log(np.linalg.det(self.I))
         
-        def predict(self,X):
-            if self.FLAC==True:
-                X = FLAC_pred_aug(X)
-            if self.add_int==True:
-                X = add_constant(X)
-            return predict(X,self.weights)
-        
         def predict_proba(self,X):
             if self.FLAC==True:
                 X = FLAC_pred_aug(X)
             if self.add_int==True:
                 X = add_constant(X)
             return predict_proba(X,self.weights)
-            
+        
+        def predict(self,X):
+            return self.predict_proba(X).round(
+        
             
         def marginal_effects(self,values=None):
             '''PARAMETERS

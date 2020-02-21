@@ -8,8 +8,10 @@ class KingZeng():
         pass
     
     def fit(self,X,y,sample_weights=None):
+        
         if type(sample_weights)==type(None):
             sample_weights = np.ones(X.shape[0])
+            
         sklogit = LogisticRegression(solver='newton-cg',penalty='none')
         sklogit.fit(X,y,sample_weights)
         p = sklogit.predict_proba(data)[:,1]
@@ -23,7 +25,7 @@ class KingZeng():
         chi = 0.5*Q*(0.5*((1+sample_weights)*p)-sample_weights)
         bias = np.linalg.multi_dot([inv_XWX,X.transpose(),W,chi])
         B_tilde = coefs-bias
-        p_tilde = sigmoid_pred(X,B_tilde)
+        
         self.coefs = B_tilde
         
     def predict_proba(self,X):
