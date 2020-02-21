@@ -61,7 +61,7 @@ class Firth_Logit():
                 self.y = y
                 sklogit = LogisticRegression(solver='newton-cg',penalty='none',fit_intercept=False)
                 sklogit.fit(X,y,sample_weight=aug_sample_weights)
-                weights = sklogit.coef_
+                weights = np.insert(sklogit.coef_,0,sklogit.intercept_)
                 
             else:
                 #initialize weights
